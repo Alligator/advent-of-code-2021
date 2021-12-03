@@ -1,0 +1,56 @@
+file: read('day2.txt')
+
+test: 'forward 5
+down 5
+forward 8
+up 3
+down 8
+forward 2'
+
+test_part1: 150
+test_part2: 900
+
+part1: {
+  var pos = 0
+  var depth = 0
+
+  for line in lines {
+    match split(line, ' ') {
+      ['forward', x]: {
+        pos = pos + num(x)
+      }
+      ['down', x]: {
+        depth = depth + num(x)
+      }
+      ['up', x]: {
+        depth = depth - num(x)
+      }
+    }
+  }
+
+  return pos * depth
+}
+
+part2: {
+  var pos = 0
+  var depth = 0
+  var aim = 0
+
+  for line in lines {
+    match split(line, ' ') {
+      ['forward', x]: {
+        pos = pos + num(x)
+        var y = aim * num(x)
+        depth = depth + y
+      }
+      ['down', x]: {
+        aim = aim + num(x)
+      }
+      ['up', x]: {
+        aim = aim - num(x)
+      }
+    }
+  }
+
+  return pos * depth
+}

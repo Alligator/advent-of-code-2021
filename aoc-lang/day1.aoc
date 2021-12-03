@@ -1,0 +1,50 @@
+file: read('day1.txt')
+
+test: '199
+200
+208
+210
+200
+207
+240
+269
+260
+263'
+
+test_part1: 7
+test_part2: 5
+
+part1: {
+  var prev = 99999
+  var count = 0
+  for line in lines {
+    if num(line) > prev {
+      count = count + 1
+    }
+    prev = num(line)
+  }
+  return count
+}
+
+part2: {
+  var prev1 = 0
+  var prev2 = 0
+  var prev3 = 0
+  var prev_sum = 99999
+  var count = 0
+
+  for line in lines {
+    prev3 = prev2
+    prev2 = prev1
+    prev1 = num(line)
+    var sum = prev1 + prev2 + prev3
+    if prev3 > 0 {
+      if sum > prev_sum {
+        count = count + 1
+      }
+      prev_sum = sum
+    }
+  }
+
+  return count
+}
