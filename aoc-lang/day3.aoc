@@ -1,0 +1,46 @@
+file: read('day3.txt')
+
+test: '00100
+11110
+10110
+10111
+10101
+01111
+00111
+11100
+10000
+11001
+00010
+01010'
+
+test_part1: 198
+
+part1: {
+  var counts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+  for line in lines {
+    for c, index in split(line, '') {
+      counts[index] = counts[index] + num(c)
+    }
+  }
+
+  var l = len(lines) / 2
+  var gamma = 0
+  var epsilon = 0
+
+  var llen = len(lines[0])
+
+  for c, index in counts {
+    if index < llen {
+      gamma = gamma * 2
+      epsilon = epsilon * 2
+      if c > l {
+        gamma = gamma + 1
+      } else {
+        epsilon = epsilon + 1
+      }
+    }
+  }
+
+  return gamma * epsilon
+}
