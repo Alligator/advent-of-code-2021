@@ -14,6 +14,7 @@ test: '00100
 01010'
 
 test_part1: 198
+test_part2: 230
 
 part1: {
   var counts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -31,16 +32,104 @@ part1: {
   var llen = len(lines[0])
 
   for c, index in counts {
-    if index < llen {
-      gamma = gamma * 2
-      epsilon = epsilon * 2
-      if c > l {
-        gamma = gamma + 1
-      } else {
-        epsilon = epsilon + 1
-      }
+    if index >= llen {
+      break
+    }
+    gamma = gamma * 2
+    epsilon = epsilon * 2
+    if c > l {
+      gamma = gamma + 1
+    } else {
+      epsilon = epsilon + 1
     }
   }
 
   return gamma * epsilon
+}
+
+part2: {
+  fn countBit(values, bitIndex) {
+    var count = 0
+    for v in values {
+      var b = num(v[bitIndex])
+      count = count + b
+    }
+    return count
+  }
+
+  fn binToNum(bin) {
+    var result = 0
+    for c in split(bin, '') {
+      var b = num(c)
+      result = result * 2 + b
+    }
+    return result
+  }
+
+  var candidates = []
+  for line in lines {
+    candidates = push(candidates, line)
+  }
+
+  var bit = 0
+
+  for c, i in split(lines[0], '') {
+    var llen = (len(candidates) + 1) / 2
+    var count = countBit(candidates, bit)
+
+    var b = 0
+    if count >= llen {
+      b = 1
+    }
+
+    var newCandidates = []
+    for cand in candidates {
+      if num(cand[bit]) == b {
+        newCandidates = push(newCandidates, cand)
+      }
+    }
+    candidates = newCandidates
+
+    if len(candidates) == 1 {
+      break
+    }
+
+    bit = bit + 1
+  }
+
+  var oxygen = binToNum(candidates[0])
+
+  candidates = []
+  for line in lines {
+    candidates = push(candidates, line)
+  }
+
+  bit = 0
+
+  for c in split(lines[0], '') {
+    var llen = (len(candidates) + 1) / 2
+    var count = countBit(candidates, bit)
+
+    var b = 0
+    if count < llen {
+      b = 1
+    }
+
+    var newCandidates = []
+    for cand in candidates {
+      if num(cand[bit]) == b {
+        newCandidates = push(newCandidates, cand)
+      }
+    }
+    candidates = newCandidates
+
+    if len(candidates) == 1 {
+      break
+    }
+
+    bit = bit + 1
+  }
+
+  var co = binToNum(candidates[0])
+  return co * oxygen
 }
