@@ -1,0 +1,278 @@
+file: read('day4.txt')
+
+test: '7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
+
+22 13 17 11  0
+ 8  2 23  4 24
+21  9 14 16  7
+ 6 10  3 18  5
+ 1 12 20 15 19
+
+ 3 15  0  2 22
+ 9 18 13 17  5
+19  8  7 25 23
+20 11 10 24  4
+14 21 16 12  6
+
+14 21 17 24  4
+10 16 15  9 19
+18  8 23 26 20
+22 11 13  6  5
+ 2  0 12  3  7'
+
+test_part1: 4512
+test_part2: 1924
+
+part1: {
+  fn parse_nums() {
+    var nums = []
+    for n in split(lines[0], ',') {
+      nums = push(nums, num(n))
+    }
+    return nums
+  }
+
+  fn parse_boards() {
+    var boards = []
+    var board_index = 0
+    var current_board = []
+
+    for l, index in lines {
+      if index < 2 {
+        continue
+      }
+
+      if l == '' {
+        boards = push(boards, current_board)
+        current_board = []
+      } else {
+        var board_line = []
+        for n in split(l, ' ') {
+          if n != '' {
+            board_line = push(board_line, num(n))
+          }
+        }
+        current_board = push(current_board, board_line)
+      }
+    }
+    boards = push(boards, current_board)
+    return boards
+  }
+
+  fn print_boards(boards) {
+    for b in boards {
+      for l in b {
+        print(l)
+      }
+      print('---')
+    }
+  }
+
+  fn mark_boards(boards, n) {
+    for board, bi in boards {
+      for line in board {
+        for num, ni in line {
+          if num == n {
+            line[ni] = 1234
+          }
+        }
+      }
+    }
+  }
+
+  fn check_boards(boards) {
+    for board, bi in boards {
+      for line, index in board {
+        # check line
+        var line_sum = 0
+        for num in line {
+          line_sum = line_sum + num
+        }
+        if line_sum == 1234 * 5 {
+          return bi
+        }
+
+        # check column
+        var col_sum = 0
+        var col = 0
+
+        # TODO cannot parse col_sum = col_sum + board[0][index]
+        col = board[0]
+        col_sum = col_sum + col[index]
+
+        col = board[1]
+        col_sum = col_sum + col[index]
+
+        col = board[2]
+        col_sum = col_sum + col[index]
+
+        col = board[3]
+        col_sum = col_sum + col[index]
+
+        col = board[4]
+        col_sum = col_sum + col[index]
+
+        if col_sum == 1234 * 5 {
+          return bi
+        }
+      }
+    }
+  }
+
+  var nums = parse_nums()
+  var boards = parse_boards()
+  var winner_index = nil
+  var last_num = 0
+
+  for n in nums {
+    mark_boards(boards, n)
+    var bi = check_boards(boards)
+    if bi != nil {
+      winner_index = bi
+      last_num = n
+      break
+    }
+  }
+
+  var winner = boards[winner_index]
+  var sum = 0
+  for line in winner {
+    for num in line {
+      if num != 1234 {
+        sum = sum + num
+      }
+    }
+  }
+
+  return sum * last_num
+}
+
+part2: {
+  fn parse_nums() {
+    var nums = []
+    for n in split(lines[0], ',') {
+      nums = push(nums, num(n))
+    }
+    return nums
+  }
+
+  fn parse_boards() {
+    var boards = []
+    var board_index = 0
+    var current_board = []
+
+    for l, index in lines {
+      if index < 2 {
+        continue
+      }
+
+      if l == '' {
+        boards = push(boards, current_board)
+        current_board = []
+      } else {
+        var board_line = []
+        for n in split(l, ' ') {
+          if n != '' {
+            board_line = push(board_line, num(n))
+          }
+        }
+        current_board = push(current_board, board_line)
+      }
+    }
+    boards = push(boards, current_board)
+    return boards
+  }
+
+  fn print_boards(boards) {
+    for b in boards {
+      for l in b {
+        print(l)
+      }
+      print('---')
+    }
+  }
+
+  fn mark_boards(boards, n) {
+    for board, bi in boards {
+      for line in board {
+        for num, ni in line {
+          if num == n {
+            line[ni] = 1234
+          }
+        }
+      }
+    }
+  }
+
+  fn check_boards(boards) {
+    var winners = []
+    for board, bi in boards {
+      for line, index in board {
+        # check line
+        var line_sum = 0
+        for num in line {
+          line_sum = line_sum + num
+        }
+        if line_sum == 1234 * 5 {
+          winners = push(winners, [bi, board])
+        }
+
+        # check column
+        var col_sum = 0
+        var col = 0
+
+        # TODO cannot parse col_sum = col_sum + board[0][index]
+        col = board[0]
+        col_sum = col_sum + col[index]
+
+        col = board[1]
+        col_sum = col_sum + col[index]
+
+        col = board[2]
+        col_sum = col_sum + col[index]
+
+        col = board[3]
+        col_sum = col_sum + col[index]
+
+        col = board[4]
+        col_sum = col_sum + col[index]
+
+        if col_sum == 1234 * 5 {
+          winners = push(winners, [bi, board])
+        }
+      }
+    }
+
+    return winners
+  }
+
+  var nums = parse_nums()
+  var boards = parse_boards()
+  var last_num = 0
+  var last_winner = nil
+
+  for n in nums {
+    mark_boards(boards, n)
+
+    var winners = check_boards(boards)
+    var offset = 0
+    for w in winners {
+      # assume these increase
+      boards = delete(boards, w[0] - offset)
+      offset = offset + 1
+      last_winner = w[1]
+      last_num = n
+    }
+  }
+
+  var sum = 0
+  for line in last_winner {
+    for num in line {
+      if num != 1234 {
+        sum = sum + num
+      }
+    }
+  }
+
+  return sum * last_num
+}
