@@ -66,70 +66,43 @@ part2: {
     return result
   }
 
-  var candidates = []
-  for line in lines {
-    candidates = push(candidates, line)
-  }
-
-  var bit = 0
-
-  for c, i in split(lines[0], '') {
-    var llen = (len(candidates) + 1) / 2
-    var count = countBit(candidates, bit)
-
-    var b = 0
-    if count >= llen {
-      b = 1
+  fn criteria(comp) {
+    var candidates = []
+    for line in lines {
+      candidates = push(candidates, line)
     }
 
-    var newCandidates = []
-    for cand in candidates {
-      if num(cand[bit]) == b {
-        newCandidates = push(newCandidates, cand)
+    var bit = 0
+
+    for c, i in split(lines[0], '') {
+      var llen = (len(candidates) + 1) / 2
+      var count = countBit(candidates, bit)
+
+      var b = 0
+      if comp(count, llen) {
+        b = 1
       }
-    }
-    candidates = newCandidates
 
-    if len(candidates) == 1 {
-      break
-    }
-
-    bit = bit + 1
-  }
-
-  var oxygen = binToNum(candidates[0])
-
-  candidates = []
-  for line in lines {
-    candidates = push(candidates, line)
-  }
-
-  bit = 0
-
-  for c in split(lines[0], '') {
-    var llen = (len(candidates) + 1) / 2
-    var count = countBit(candidates, bit)
-
-    var b = 0
-    if count < llen {
-      b = 1
-    }
-
-    var newCandidates = []
-    for cand in candidates {
-      if num(cand[bit]) == b {
-        newCandidates = push(newCandidates, cand)
+      var newCandidates = []
+      for cand in candidates {
+        if num(cand[bit]) == b {
+          newCandidates = push(newCandidates, cand)
+        }
       }
-    }
-    candidates = newCandidates
+      candidates = newCandidates
 
-    if len(candidates) == 1 {
-      break
+      if len(candidates) == 1 {
+        break
+      }
+
+      bit = bit + 1
     }
 
-    bit = bit + 1
+    return binToNum(candidates[0])
   }
 
-  var co = binToNum(candidates[0])
+  var oxygen = criteria(fn(count, llen) { return count >= llen })
+  var co = criteria(fn(count, llen) { return count < llen })
+
   return co * oxygen
 }
