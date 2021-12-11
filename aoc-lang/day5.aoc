@@ -1,0 +1,141 @@
+file: read('day5.txt')
+
+test: '0,9 -> 5,9
+8,0 -> 0,8
+9,4 -> 3,4
+2,2 -> 2,1
+7,0 -> 7,4
+6,4 -> 2,0
+0,9 -> 2,9
+3,4 -> 1,4
+0,0 -> 8,8
+5,5 -> 8,2'
+
+test_part1: 5
+test_part2: 12
+
+part1: {
+  var coords = {}
+
+  for line in lines {
+    var sp = split(line, ' -> ')
+    var lnums = split(sp[0], ',')
+    var rnums = split(sp[1], ',')
+
+    var x0 = num(lnums[0])
+    var y0 = num(lnums[1])
+    var x1 = num(rnums[0])
+    var y1 = num(rnums[1])
+
+    if x0 != x1 {
+      if y0 != y1 {
+        continue
+      }
+    }
+
+    if x0 > x1 {
+      var tmp = x0
+      x0 = x1
+      x1 = tmp
+    }
+
+    if y0 > y1 {
+      var tmp = y0
+      y0 = y1
+      y1 = tmp
+    }
+
+    for x in range(x0, x1 + 1) {
+      for y in range(y0, y1 + 1) {
+        var index = x * 1000 + y
+        coords[index] = coords[index] + 1
+      }
+    }
+  }
+
+  var sum = 0
+  for key, val in coords {
+    if val > 1 {
+      sum = sum + 1
+    }
+  }
+  return sum
+}
+
+part2: {
+  var coords = {}
+
+  for line, idx in lines {
+    var sp = split(line, ' -> ')
+    var lnums = split(sp[0], ',')
+    var rnums = split(sp[1], ',')
+
+    var x0 = num(lnums[0])
+    var y0 = num(lnums[1])
+    var x1 = num(rnums[0])
+    var y1 = num(rnums[1])
+
+    var xstep = 1
+    if x1 < x0 {
+      # TODO unary -
+      xstep = xstep - 2
+    }
+    if x1 == x0 {
+      xstep = 0
+    }
+
+    var ystep = 1
+    if y1 < y0 {
+      ystep = ystep - 2
+    }
+    if y1 == y0 {
+      ystep = 0
+    }
+
+    var rstart = x0
+    var rend = x1 + xstep
+    if xstep == 0 {
+      rstart = y0
+      rend = y1 + ystep
+    }
+
+    var x = x0
+    var y = y0
+
+    for i in range(rstart, rend) {
+      var index = x * 1000 + y
+      coords[index] = coords[index] + 1
+      x = x + xstep
+      y = y + ystep
+    }
+  }
+
+  fn print_lines() {
+    print(' ')
+    for x in range(0, 10) {
+      print(x)
+    }
+    println()
+
+    for y in range(0, 10) {
+      print(y)
+      for x in range(0, 10) {
+        var el = coords[x * 1000 + y]
+        if el == nil {
+          print('.')
+        } else {
+          print(el)
+        }
+      }
+      println('')
+    }
+  }
+
+  var sum = 0
+  for key, val in coords {
+    if val > 1 {
+      sum = sum + 1
+    }
+  }
+  return sum
+}
