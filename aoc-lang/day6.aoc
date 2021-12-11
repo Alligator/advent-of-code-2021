@@ -5,7 +5,53 @@ test: '3,4,3,1,2'
 test_part1: 5934
 test_part2: 26984457539
 
-part1: {
+fn run(fish, end) {
+  # notes
+  #
+  # i don't need to store all the fish, just how many are created on each day
+  # of the cycle
+  #
+  # there are two cycles, 7 day and 9 day.
+  #
+  # when a 7 cycle is due, add them to the 9 day (new fish)
+  # when a 9 cycle is due, add them to the 7 day (9 cycle fish becomes 7 cycle)
+
+  var c7 = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+  var c9 = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+  var total = 0
+
+  for f in split(fish, ',') {
+    var i = num(f) + 1
+    c7[i] = c7[i] + 1
+    total = total + 1
+  }
+
+  for i in rangei(0, end) {
+    var i7 = i % 7
+    var i9 = i % 9
+
+    var c7count = c7[i7]
+    var c9count = c9[i9]
+
+    # println('day', i)
+    if c9count > 0 {
+      # println('  9 cycles up:', c9count)
+      c7[i7] = c7[i7] + c9count
+      total = total + c9count
+    }
+
+    if c7count > 0 {
+      # println('  7 cycles up:', c7count)
+      c9[i9] = c9[i9] + c7count
+      total = total + c7count
+    }
+    # println('  total', total)
+  }
+
+  return total
+}
+
+old_part1: {
   var fish = []
   for f in split(lines[0], ',') {
     fish = push(fish, num(f))
@@ -32,48 +78,5 @@ part1: {
   return len(fish)
 }
 
-part2: {
-  # notes
-  #
-  # i don't need to store all the fish, just how many are created on each day
-  # of the cycle
-  #
-  # there are two cycles, 7 day and 9 day.
-  #
-  # when a 7 cycle is due, add them to the 9 day (new fish)
-  # when a 9 cycle is due, add them to the 7 day (9 cycle fish becomes 7 cycle)
-
-  var c7 = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-  var c9 = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-  var total = 0
-
-  for f in split(lines[0], ',') {
-    var i = num(f) + 1
-    c7[i] = c7[i] + 1
-    total = total + 1
-  }
-
-  for i in rangei(0, 256) {
-    var i7 = i % 7
-    var i9 = i % 9
-
-    var c7count = c7[i7]
-    var c9count = c9[i9]
-
-    # println('day', i)
-    if c9count > 0 {
-      # println('  9 cycles up:', c9count)
-      c7[i7] = c7[i7] + c9count
-      total = total + c9count
-    }
-    
-    if c7count > 0 {
-      # println('  7 cycles up:', c7count)
-      c9[i9] = c9[i9] + c7count
-      total = total + c7count
-    }
-    # println('  total', total)
-  }
-
-  return total
-}
+part1: { return run(lines[0], 80) }
+part2: { return run(lines[0], 256) }
