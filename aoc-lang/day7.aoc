@@ -1,0 +1,33 @@
+file: read('day7.txt')
+
+test: '16,1,2,0,4,2,7,1,2,14'
+test_part1: 37
+test_part2: 168
+
+part1: {
+  var nums = []
+  for c in split(input, ',') {
+    if num(c) != nil {
+      nums = push(nums, num(c))
+    }
+  }
+
+  var sorted = sort(nums)
+  var median = sorted[len(sorted)/2]
+
+  var fuel = 0
+  for n in nums {
+    var diff = median - n
+    if diff < 0 {
+      diff = 0 - diff
+    }
+    fuel = fuel + diff
+  }
+
+  return fuel
+}
+
+part2: {
+  # triangular numbers innit
+  return 0
+}
