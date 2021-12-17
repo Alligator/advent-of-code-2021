@@ -4,14 +4,18 @@ test: '16,1,2,0,4,2,7,1,2,14'
 test_part1: 37
 test_part2: 168
 
-part1: {
+fn parse_input(input) {
   var nums = []
   for c in split(input, ',') {
     if num(c) != nil {
       nums = push(nums, num(c))
     }
   }
+  return nums
+}
 
+part1: {
+  var nums = parse_input(input)
   var sorted = sort(nums)
   var median = sorted[len(sorted)/2]
 
@@ -29,5 +33,39 @@ part1: {
 
 part2: {
   # triangular numbers innit
-  return 0
+
+  # naive solution
+  var nums = parse_input(input)
+  var min = 9999
+  var max = 0
+
+  for n in nums {
+    if n > max {
+      max = n
+    }
+    if n < min {
+      min = n
+    }
+  }
+
+  var min_fuel = 99999999999
+
+  for i in rangei(min, max) {
+    var fuel = 0
+    for n in nums {
+      var diff = n - i
+      # abs
+      if diff < 0 {
+        diff = 0 - diff
+      }
+
+      var tri = (diff * (diff + 1)) / 2
+      fuel = fuel + tri
+    }
+    if fuel < min_fuel {
+      min_fuel = fuel
+    }
+  }
+
+  return min_fuel
 }
