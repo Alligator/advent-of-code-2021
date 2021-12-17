@@ -1,0 +1,172 @@
+file: read('day8.txt')
+test: 'be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
+edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc
+fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef | cg cg fdcagb cbg
+fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega | efabcd cedba gadfec cb
+aecbfdg fbg gf bafeg dbefa fcge gcbea fcaegb dgceab fcbdga | gecf egdcabf bgf bfgea
+fgeab ca afcebg bdacfeg cfaedg gcfdb baec bfadeg bafgc acf | gebdcfa ecba ca fadegcb
+dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf | cefg dcbef fcge gbcadfe
+bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd | ed bcgafe cdgba cbgef
+egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg | gbdfcae bgc cg cgb
+gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce'
+# test: 'acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf'
+
+test_part1: 26
+test_part2: 61229
+
+part1: {
+  var count = 0
+
+  for line, li in lines {
+    var sp = split(line, ' | ')
+
+    for d in split(sp[1], ' ') {
+      if len(d) == 2 {
+        count = count + 1
+      } else if len(d) == 4 {
+        count = count + 1
+      } else if len(d) == 3 {
+        count = count + 1
+      } else if len(d) == 7 {
+        count = count + 1
+      }
+    }
+  }
+
+  return count
+}
+
+part2: {
+  # notes
+  #
+  # find which sets of wires are 1, 4, 7, and 8
+  #
+  # find these wires by counting:
+  # 
+  #   b (count = 6)
+  #   e (count = 4)
+  #   f (count = 9)
+  #
+  # find c by removing f from 1
+  #
+  # find a by counting and ignoring c:
+  #
+  #   a (count = 8)
+  #
+  # find d by removing b, c, and f from 4
+  # 
+  # g is whatever's left
+
+  var count = 0
+
+  for line, li in lines {
+    var sp = split(line, ' | ')
+    var lhs = split(sp[0], ' ')
+    var rhs = split(sp[1], ' ')
+
+    var sig2seg = {}
+    var seg2sig = {}
+    var digits = {}
+
+    # find which sets of wires are 1, 4, 7, and 8
+    for d in lhs {
+      if len(d) == 2 {
+        digits[1] = d
+      } else if len(d) == 4 {
+        digits[4] = d
+      } else if len(d) == 3 {
+        digits[7] = d
+      } else if len(d) == 7 {
+        digits[8] = d
+      }
+    }
+
+    # find b, e, and f by counting
+    var counts = {}
+    for d in lhs {
+      for c in split(d, '') {
+        if counts[c] == nil {
+          counts[c] = 0
+        }
+        counts[c] = counts[c] + 1
+      }
+    }
+
+    for k, v in counts {
+      if v == 6 {
+        seg2sig['b'] = k
+        sig2seg[k] = 'b'
+      } else if v == 4 {
+        seg2sig['e'] = k
+        sig2seg[k] = 'e'
+      } else if v == 9 {
+        seg2sig['f'] = k
+        sig2seg[k] = 'f'
+      }
+    }
+
+    # find c by removing f from 1
+    for d in split(digits[1], '') {
+      if d != seg2sig['f'] {
+        seg2sig['c'] = d
+        sig2seg[d] = 'c'
+        break
+      }
+    }
+
+    # find a by counting and ignoring c:
+    for k, v in counts {
+      if v == 8 {
+        if k != seg2sig['c'] {
+          seg2sig['a'] = k
+          sig2seg[k] = 'a'
+          break
+        }
+      }
+    }
+
+    # find d by removing b, c, and f from 4
+    for d in split(digits[4], '') {
+      if d != seg2sig['b'] && d != seg2sig['c'] && d != seg2sig['f'] {
+        seg2sig['d'] = d
+        sig2seg[d] = 'd'
+        break
+      }
+    }
+
+    # g is whatever's left
+    for d in ['a', 'b', 'c', 'd', 'e', 'f', 'g'] {
+      if sig2seg[d] == nil {
+        seg2sig['g'] = d
+        sig2seg[d] = 'g'
+        break
+      }
+    }
+
+    # now decode the rhs
+    var result = 0
+    for r in rhs {
+      var segs = []
+      for sr in split(r, '') {
+        segs = push(segs, sig2seg[sr])
+      }
+      var digit = 0
+      match sort(segs) {
+        ['a', 'b', 'c', 'e', 'f', 'g']:     { digit = 0 }
+        ['c', 'f']:                         { digit = 1 }
+        ['a', 'c', 'd', 'e', 'g']:          { digit = 2 }
+        ['a', 'c', 'd', 'f', 'g']:          { digit = 3 }
+        ['b', 'c', 'd', 'f']:               { digit = 4 }
+        ['a', 'b', 'd', 'f', 'g']:          { digit = 5 }
+        ['a', 'b', 'd', 'e', 'f', 'g']:     { digit = 6 }
+        ['a', 'c', 'f']:                    { digit = 7 }
+        ['a', 'b', 'c', 'd', 'e', 'f' 'g']: { digit = 8 }
+        ['a', 'b', 'c', 'd', 'f' 'g']:      { digit = 9 }
+      }
+      result = (result * 10) + digit
+    }
+    count = count + result
+  }
+
+  return count
+}
