@@ -152,16 +152,16 @@ part2: {
       }
       var digit = 0
       match sort(segs) {
-        ['a', 'b', 'c', 'e', 'f', 'g']:     { digit = 0 }
-        ['c', 'f']:                         { digit = 1 }
-        ['a', 'c', 'd', 'e', 'g']:          { digit = 2 }
-        ['a', 'c', 'd', 'f', 'g']:          { digit = 3 }
-        ['b', 'c', 'd', 'f']:               { digit = 4 }
-        ['a', 'b', 'd', 'f', 'g']:          { digit = 5 }
-        ['a', 'b', 'd', 'e', 'f', 'g']:     { digit = 6 }
-        ['a', 'c', 'f']:                    { digit = 7 }
-        ['a', 'b', 'c', 'd', 'e', 'f' 'g']: { digit = 8 }
-        ['a', 'b', 'c', 'd', 'f' 'g']:      { digit = 9 }
+        ['a', 'b', 'c', 'e', 'f', 'g']:      { digit = 0 }
+        ['c', 'f']:                          { digit = 1 }
+        ['a', 'c', 'd', 'e', 'g']:           { digit = 2 }
+        ['a', 'c', 'd', 'f', 'g']:           { digit = 3 }
+        ['b', 'c', 'd', 'f']:                { digit = 4 }
+        ['a', 'b', 'd', 'f', 'g']:           { digit = 5 }
+        ['a', 'b', 'd', 'e', 'f', 'g']:      { digit = 6 }
+        ['a', 'c', 'f']:                     { digit = 7 }
+        ['a', 'b', 'c', 'd', 'e', 'f', 'g']: { digit = 8 }
+        ['a', 'b', 'c', 'd', 'f', 'g']:      { digit = 9 }
       }
       result = (result * 10) + digit
     }

@@ -27,16 +27,44 @@ part1: {
     var x1 = num(rnums[0])
     var y1 = num(rnums[1])
 
-    if x0 != x1 {
-      if y0 != y1 {
-        continue
-      }
+    var cont = 0
+    if x0 != x1 && y0 != y1 {
+      cont = 1
     }
 
-    for x in rangei(x0, x1) {
-      for y in rangei(y0, y1) {
+    if cont == 0 {
+      var xstep = 1
+      if x1 < x0 {
+        # TODO unary -
+        xstep = xstep - 2
+      }
+      if x1 == x0 {
+        xstep = 0
+      }
+
+      var ystep = 1
+      if y1 < y0 {
+        ystep = ystep - 2
+      }
+      if y1 == y0 {
+        ystep = 0
+      }
+
+      var rstart = x0
+      var rend = x1
+      if xstep == 0 {
+        rstart = y0
+        rend = y1
+      }
+
+      var x = x0
+      var y = y0
+
+      for i in rangei(rstart, rend) {
         var index = x * 1000 + y
         coords[index] = coords[index] + 1
+        x = x + xstep
+        y = y + ystep
       }
     }
   }

@@ -78,5 +78,5 @@ old_part1: {
   return len(fish)
 }
 
-part1: { return run(lines[0], 80) }
-part2: { return run(lines[0], 256) }
+part1: run(lines[0], 80)
+part2: run(lines[0], 256)
