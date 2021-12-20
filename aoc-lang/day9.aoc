@@ -1,0 +1,209 @@
+file: read('day9.txt')
+
+test: '2199943210
+3987894921
+9856789892
+8767896789
+9899965678'
+# test: '101
+# 000
+# 101'
+test_part1: 15
+test_part2: 1134
+
+fn parse_input(lines) {
+  var points = []
+  for row in lines {
+    var row_points = []
+    for col in split(row, '') {
+      row_points = push(row_points, num(col))
+    }
+    points = push(points, row_points)
+  }
+  return points
+}
+
+part1: {
+  var pts = parse_input(lines)
+
+  var maxx = len(pts[0]) - 1
+  var maxy = len(pts) - 1
+  var sum = 0
+
+  fn is_lowest(dirs, x, y) {
+    var pt = pts[y][x]
+
+    for dir in split(dirs, '') {
+      var other_pt = 0
+      match dir {
+        'u': { other_pt = pts[y-1][x] }
+        'l': { other_pt = pts[y][x-1] }
+        'd': { other_pt = pts[y+1][x] }
+        'r': { other_pt = pts[y][x+1] }
+      }
+      if other_pt <= pt {
+        return 0
+      }
+    }
+
+    return 1
+  }
+
+  for y in rangei(0, maxy) {
+    for x in rangei(0, maxx) {
+      var pt = pts[y][x]
+
+      # top left
+      if x == 0 && y == 0 {
+        if is_lowest('rd', x, y) {
+          sum = sum + pt + 1
+        }
+        continue
+      }
+
+      # top right
+      if x == maxx && y == 0 {
+        if is_lowest('ld', x, y) {
+          sum = sum + pt + 1
+        }
+        continue
+      }
+      
+      # bottom left
+      if x == 0 && y == maxy {
+        if is_lowest('ur', x, y) {
+          sum = sum + pt + 1
+        }
+        continue
+      }
+
+      # bottom right
+      if x == maxx && y == maxy {
+        if is_lowest('ul', x, y) {
+          sum = sum + pt + 1
+        }
+        continue
+      }
+
+      # top edge
+      if y == 0 {
+        if is_lowest('lrd', x, y) {
+          sum = sum + pt + 1
+        }
+        continue
+      }
+
+      # left edge
+      if x == 0 {
+        if is_lowest('urd', x, y) {
+          sum = sum + pt + 1
+        }
+        continue
+      }
+
+      # right edge
+      if x == maxx {
+        if is_lowest('uld', x, y) {
+          sum = sum + pt + 1
+        }
+        continue
+      }
+
+      # bottom edge
+      if y == maxy {
+        if is_lowest('url', x, y) {
+          sum = sum + pt + 1
+        }
+        continue
+      }
+
+      if is_lowest('urld', x, y) {
+        sum = sum + pt + 1
+        continue
+      }
+    }
+  }
+
+  return sum
+}
+
+part2: {
+  var pts = parse_input(lines)
+  var maxx = len(pts[0]) - 1
+  var maxy = len(pts) - 1
+  var visited = {}
+
+  fn flood_fill(x, y) {
+    var size = 0
+    visited[x + ',' + y] = 1
+
+    var fronts = [[x, y]]
+    var new_fronts = []
+
+    fn visit(vx, vy) {
+      var key = vx + ',' + vy
+      if visited[key] != nil {
+        return 0
+      }
+      var p = pts[vy][vx]
+      visited[key] = 1
+      if p != 9 {
+        new_fronts = push(new_fronts, [vx, vy])
+      }
+    }
+
+    for {
+      if len(fronts) == 0 {
+        break
+      }
+
+      new_fronts = []
+
+      for front in fronts {
+        size = size + 1
+        var fx = front[0]
+        var fy = front[1]
+
+        if fx > 0 {
+          visit(fx-1, fy)
+        }
+        if fx < maxx {
+          visit(fx+1, fy)
+        }
+        if fy > 0 {
+          visit(fx, fy-1)
+        }
+        if fy < maxy {
+          visit(fx, fy+1)
+        }
+      }
+
+      fronts = new_fronts
+      # println(fronts, visited)
+    }
+
+    return size
+  }
+
+  var basins = []
+  for y in rangei(0, maxy) {
+    for x in rangei(0, maxx) {
+      if visited[x + ',' + y] != nil {
+        continue
+      }
+      var pt = pts[y][x]
+      if pt == 9 {
+        continue
+      }
+      var basin_size = flood_fill(x, y)
+      basins = push(basins, basin_size)
+    }
+  }
+
+  var sum = 1
+  var sbasins = sort(basins)
+  for i in range(len(sbasins)-3, len(sbasins)) {
+    sum = sum * sbasins[i]
+  }
+  return sum
+}
