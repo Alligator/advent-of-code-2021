@@ -1,0 +1,112 @@
+file: read('day10.txt')
+test: '[({(<(())[]>[[{[]{<()<>>
+[(()[<>])]({[<{<<[]>>(
+{([(<{}[<>[]}>{[]{[(<()>
+(((({<>}<{<{<>}{[]{[]{}
+[[<[([]))<([[{}[[()]]]
+[{[{({}]{}}([{[{{{}}([]
+{<[[]]>}<{[{[{[]{()[[[]
+[<(<(<(<{}))><([]([]()
+<{([([[(<>()){}]>(<<{{
+<{([{{}}[<[[[<>{}]]]>[]]'
+test_part1: 26397
+test_part2: 288957
+
+part1: {
+  var closers = {
+    '(': ')',
+    '[': ']',
+    '{': '}',
+    '<': '>',
+  }
+
+  var score = 0
+  fn add_score(c) {
+    match c {
+      ')': { score = score + 3 }
+      ']': { score = score + 57 }
+      '}': { score = score + 1197 }
+      '>': { score = score + 25137 }
+    }
+  }
+
+  for line in lines {
+    var stack = []
+    for c in split(line, '') {
+      var closer = closers[c]
+      if closer != nil {
+        # opener
+        stack = push(stack, closer)
+      } else {
+        if len(stack) == 0 {
+          add_score(c)
+          break
+        }
+
+        var last = stack[len(stack) - 1]
+        if last != c {
+          add_score(c)
+          break
+        }
+        stack = slice(stack, 0, len(stack)-1)
+      }
+    }
+  }
+
+  return score
+}
+
+part2: {
+  var closers = {
+    '(': ')',
+    '[': ']',
+    '{': '}',
+    '<': '>',
+  }
+
+  var scores = []
+
+  for line in lines {
+    var stack = []
+    var discard = 0
+
+    for c in split(line, '') {
+      var closer = closers[c]
+      if closer != nil {
+        # opener
+        stack = push(stack, closer)
+      } else {
+        if len(stack) == 0 {
+          discard = 1
+          break
+        }
+
+        var last = stack[len(stack) - 1]
+        if last != c {
+          discard = 1
+          break
+        }
+        stack = slice(stack, 0, len(stack)-1)
+      }
+    }
+
+    if discard {
+      continue
+    }
+
+    var line_score = 0
+    for i in rangei(len(stack) - 1, 0) {
+      var c = stack[i]
+      match c {
+        ')': { line_score = line_score * 5 + 1 }
+        ']': { line_score = line_score * 5 + 2 }
+        '}': { line_score = line_score * 5 + 3 }
+        '>': { line_score = line_score * 5 + 4 }
+      }
+    }
+    scores = push(scores, line_score)
+  }
+
+  var sorted_scores = sort(scores)
+  return sorted_scores[len(sorted_scores)/2]
+}
