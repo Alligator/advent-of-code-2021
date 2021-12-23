@@ -1,0 +1,145 @@
+file: read('day12.txt')
+# test: 'start-A
+# start-b
+# A-c
+# A-b
+# b-d
+# A-end
+# b-end'
+test: 'fs-end
+he-DX
+fs-he
+start-DX
+pj-DX
+end-zg
+zg-sl
+zg-pj
+pj-he
+RW-he
+fs-DX
+pj-RW
+zg-RW
+start-pj
+he-WI
+zg-he
+pj-fs
+start-RW'
+test_part1: 226
+test_part2: 3509
+
+fn read_caves(lines) {
+  var caves = {}
+  for line in lines {
+    var sp = split(line, '-')
+    var from = sp[0]
+    var to = sp[1]
+    if caves[from] == nil {
+      caves[from] = []
+    }
+    if caves[to] == nil {
+      caves[to] = []
+    }
+    caves[from] = push(caves[from], to)
+    caves[to] = push(caves[to], from)
+  }
+  return caves
+}
+
+fn copy(map) {
+  var new = {}
+  for k, v in map {
+    new[k] = v
+  }
+  return new
+}
+
+
+part1: {
+  var caves = read_caves(lines)
+
+  fn visit(cave, visited, depth, path) {
+    var indent = ''
+    for i in range(0, depth) {
+      indent = indent + ' .'
+    }
+
+    if cave == 'end' {
+      # println(indent, path)
+      return 1
+    }
+
+    var next = caves[cave]
+
+    if next == nil {
+      return 0
+    }
+    # println(indent, cave, '->', next, visited)
+
+    var count = 0
+    for next_cave in next {
+      # println(indent, 'checking', next_cave)
+      var nv = copy(visited)
+
+      if next_cave != upper(next_cave) {
+        # lowercase
+        if visited[next_cave] {
+          # println(indent, 'ignoring', next_cave)
+          continue
+        }
+        nv[next_cave] = 1
+      }
+      # println(indent, 'visiting', next_cave)
+      count = count + visit(next_cave, nv, depth + 1,
+        push(path, next_cave))
+    }
+    return count
+  }
+
+  return visit('start', { start: 1 }, 0, ['start'])
+}
+
+part2: {
+  var caves = read_caves(lines)
+
+  fn visit(caves, cave, visited, can_double) {
+    if cave == 'end' {
+      return 1
+    }
+
+    var next = caves[cave]
+
+    if next == nil {
+      return 0
+    }
+
+    var count = 0
+    for next_cave in next {
+      if next_cave == 'start' {
+        continue
+      }
+
+      var nv = copy(visited)
+      var cd = can_double
+
+      if next_cave != upper(next_cave) {
+        # lowercase
+        if nv[next_cave] >= 1 {
+          # can we double dip?
+          if can_double == 0 {
+            nv[next_cave] = nv[next_cave] + 1
+            continue
+          }
+          cd = 0
+        }
+        if nv[next_cave] == nil {
+          nv[next_cave] = 0
+        }
+        nv[next_cave] = nv[next_cave] + 1
+      }
+      count = count + visit(caves, next_cave, nv, cd)
+    }
+    return count
+  }
+
+  return visit(caves, 'start', { start: 2 }, 1)
+}
