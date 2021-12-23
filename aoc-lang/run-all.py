@@ -5,7 +5,7 @@ import sys
 
 pat = re.compile(r'part[12] took (.*)')
 
-for f in sorted(glob.glob('*.aoc')):
+for f in sorted(glob.glob('*.aoc'), key=lambda x: int(re.findall('\d+', x)[0])):
     cmd = f'aoc21 -b {f}'
     if '-t' in sys.argv:
         cmd = f'aoc21 -b -t {f}'
@@ -13,5 +13,7 @@ for f in sorted(glob.glob('*.aoc')):
     m = pat.findall(p.stdout.decode('utf-8'))
     if m:
         p1 = m[0]
-        p2 = m[1]
+        p2 = '.'
+        if len(m) > 1:
+            p2 = m[1]
         print(f'{f}\t{p1}\t{p2}')
