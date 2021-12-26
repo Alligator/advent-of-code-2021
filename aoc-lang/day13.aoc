@@ -21,7 +21,7 @@ test: '6,10
 fold along y=7
 fold along x=5'
 test_part1: 17
-test_part1: 0
+test_part2: 0
 
 fn parse_input(lines) {
   var points = []
