@@ -1,0 +1,159 @@
+file: read('day13.txt')
+test: '6,10
+0,14
+9,10
+0,3
+10,4
+4,11
+6,0
+6,12
+4,1
+0,13
+10,12
+3,4
+3,0
+8,4
+1,10
+2,14
+8,10
+9,0
+
+fold along y=7
+fold along x=5'
+test_part1: 17
+test_part1: 0
+
+fn parse_input(lines) {
+  var points = []
+  var splits = []
+  var mode = 'point'
+  for line in lines {
+    if line == '' {
+      mode = 'fold'
+      continue
+    }
+
+    if mode == 'point' {
+      var p = split(line, ',')
+      points = push(points, [num(p[0]), num(p[1])])
+      continue
+    }
+
+    if mode == 'fold' {
+      var f = split(line, ' ')
+      var coord = split(f[2], '=')
+      splits = push(splits, [coord[0], num(coord[1])])
+    }
+  }
+  return [points, splits]
+}
+
+fn print_dots(points) {
+  # find extent
+  var w = 0
+  var h = 0
+
+  for p in points {
+    if p[0] > w {
+      w = p[0]
+    }
+    if p[1] > h {
+      h = p[1]
+    }
+  }
+  w = w + 1
+  h = h + 1
+
+  # get points in draw order
+  var points_to_draw = []
+
+  for p in points {
+    points_to_draw = push(points_to_draw, p[1] * w + p[0])
+  }
+  points_to_draw = sort(points_to_draw)
+
+  # do the dang thing
+  var point_index = 0
+  var point = points_to_draw[point_index]
+
+  for y in range(0, h) {
+    for x in range(0, w) {
+      if y * w + x == point {
+        print('#')
+        point_index = point_index + 1
+        if point_index < len(points_to_draw) {
+          point = points_to_draw[point_index]
+        }
+      } else {
+        print('.')
+      }
+    }
+    println()
+  }
+  println()
+}
+
+fn dedupe(points) {
+  var sp = sort(points)
+  var deduped = []
+  var seen = {}
+  for p in sp {
+    var key = p[0] + ',' + p[1]
+    if seen[key] {
+      continue
+    }
+    seen[key] = 1
+    deduped = push(deduped, p)
+  }
+  return deduped
+}
+
+fn do_fold(fold, points) {
+  var next_points = []
+  match fold {
+    ['x', foldx]: {
+      for p in points {
+        if p[0] < foldx {
+          next_points = push(next_points, p)
+            continue
+        }
+        var diff = foldx - (p[0] - foldx)
+          next_points = push(next_points, [diff, p[1]])
+      }
+    }
+    ['y', foldy]: {
+      for p in points {
+        if p[1] < foldy {
+          next_points = push(next_points, p)
+            continue
+        }
+        var diff = foldy - (p[1] - foldy)
+          next_points = push(next_points, [p[0], diff])
+      }
+    }
+  }
+  return dedupe(next_points)
+}
+
+part1: {
+  var p = parse_input(lines)
+  var points = p[0]
+  var folds = p[1]
+
+  var first_fold = do_fold(folds[0], points)
+
+  return len(first_fold)
+}
+
+part2: {
+  var p = parse_input(lines)
+  var points = p[0]
+  var folds = p[1]
+
+  for fold in folds {
+    points = do_fold(fold, points)
+  }
+  print_dots(points)
+
+  return 0
+}
