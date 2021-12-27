@@ -1,0 +1,156 @@
+file: read('day14.txt')
+test: 'NNCB
+
+CH -> B
+HH -> N
+CB -> H
+NH -> C
+HB -> C
+HC -> B
+HN -> C
+NN -> C
+BH -> H
+NC -> B
+NB -> B
+BN -> B
+BB -> N
+BC -> B
+CC -> N
+CN -> C'
+test_part1: 1588
+test_part2: 2188189693529
+
+fn parse_input(lines) {
+  var template = split(lines[0], '')
+  var rules = {}
+  for i in range(2, len(lines)) {
+    var sp = split(lines[i], ' -> ')
+    rules[sp[0]] = sp[1]
+  }
+  return { template, rules }
+}
+
+part1: {
+  var p = parse_input(lines)
+  var tmpl = p['template']
+  var rules = p['rules']
+
+  for i in range(0, 10) {
+    var output = []
+
+    for i in range(0, len(tmpl) - 1) {
+      var key = tmpl[i] + tmpl[i+1]
+      if rules[key] != nil {
+        output = push(output, tmpl[i])
+        output = push(output, rules[key])
+      } else {
+        output = push(output, tmpl[i])
+      }
+    }
+    output = push(output, tmpl[len(tmpl) - 1])
+    # println(i, len(output))
+    tmpl = output
+  }
+
+  var counts = {}
+  for e in tmpl {
+    if counts[e] == nil {
+      counts[e] = 0
+    }
+    counts[e] = counts[e] + 1
+  }
+
+  var least_common = 9999
+  var most_common = 0
+  for k, v in counts {
+    if v < least_common {
+      least_common = v
+    }
+    if v > most_common {
+      most_common = v
+    }
+  }
+
+  return most_common - least_common
+}
+
+fn inc(obj, key, by) {
+  if obj[key] != nil {
+    obj[key] = obj[key] + by
+    return 0
+  }
+  obj[key] = by
+}
+
+part2: {
+  var template = {}
+  var sp = split(lines[0], '')
+  var counts = {}
+  for i in range(0, len(sp) - 1) {
+    var key = sp[i] + sp[i+1]
+    inc(template, key, 1)
+    inc(counts, sp[i], 1)
+  }
+  inc(counts, sp[len(sp)-1], 1)
+
+  var rules = {}
+  for i in range(2, len(lines)) {
+    var sp = split(lines[i], ' -> ')
+    rules[sp[0]] = sp[1]
+  }
+
+  for i in range(0, 40) {
+    # println()
+    # println('== step', i, '==')
+
+    var changes = {}
+    for pair, to_insert in rules {
+      # given a rule, e.g. HN -> C
+      # and a template, e.g. { HN: 2 }
+      # split the pair HN into two pairs, HC: 2 and CN: 2
+      # and decrement HN by 2
+      if template[pair] > 0 {
+        # println('matched rule', pair, '->', to_insert)
+
+        var pair1 = pair[0] + to_insert
+        var pair2 = to_insert + pair[1]
+        var count = template[pair]
+
+        # print('  pair1:', pair1)
+        # print('  pair2:', pair2)
+        # println('  count:', count)
+
+        inc(changes, pair1, count)
+        inc(changes, pair2, count)
+        inc(changes, pair, -count)
+        inc(counts, to_insert, count)
+
+        # println('  changes:', changes)
+      }
+    }
+
+    for k, v in changes {
+      inc(template, k, v)
+    }
+
+    # for k, v in template {
+    #   if v > 0 {
+    #     println(' ', k, v)
+    #   }
+    # }
+    # println(counts)
+  }
+
+  var least_common = nil
+  var most_common = nil
+  for k, v in counts {
+    if v < least_common || least_common == nil {
+      least_common = v
+    }
+    if v > most_common || most_common == nil {
+      most_common = v
+    }
+  }
+
+  return most_common - least_common
+}
