@@ -17,3 +17,8 @@ for f in sorted(glob.glob('*.aoc'), key=lambda x: int(re.findall('\d+', x)[0])):
         if len(m) > 1:
             p2 = m[1]
         print(f'{f}\t{p1}\t{p2}')
+    if p.returncode != 0:
+        print('error! stdout:')
+        print(p.stdout.decode('utf-8'))
+        print('error! stderr:')
+        print(p.stderr.decode('utf-8'))

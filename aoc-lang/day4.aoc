@@ -258,8 +258,10 @@ part2: {
     var offset = 0
     for w in winners {
       # assume these increase
-      boards = delete(boards, w[0] - offset)
-      offset = offset + 1
+      if w[0] - offset >= 0 {
+        boards = delete(boards, w[0] - offset)
+        offset = offset + 1
+      }
       last_winner = w[1]
       last_num = n
     }
