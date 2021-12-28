@@ -1,0 +1,183 @@
+file: read('day16.txt')
+test: '9C0141080250320F1802104A08'
+test_part1: 20
+test_part2: nil
+
+fn parse_input(input) {
+  var chars = split(input, '')
+  var bits = array(len(chars) * 4)
+
+  for c, index in chars {
+    var offset = index * 4
+    var n = num(c, 16)
+    for i in range(0, 4) {
+      bits[offset + 3 - i] = (n >> i) & 1
+    }
+  }
+
+  return bits
+}
+
+fn read_packet(bits, offset) {
+  # first 3 bits = version
+  var version = 0
+  for i in range(offset, offset + 3) {
+    version = version * 2 + bits[i]
+  }
+  offset = offset + 3
+
+  # next 3 bits = type
+  var type = 0
+  for i in range(offset, offset + 3) {
+    type = type * 2 + bits[i]
+  }
+  offset = offset + 3
+
+  match type {
+    4: {
+      var value = 0
+      for {
+        for i in range(offset + 1, offset + 5) {
+          value = value * 2 + bits[i]
+        }
+
+        if bits[offset] == 0 {
+          offset = offset + 5
+          break
+        }
+        offset = offset + 5
+      }
+      return { version, type, value, end: offset }
+    }
+    op: {
+      var length_type_id = bits[offset]
+      offset = offset + 1
+
+      if length_type_id == 0 {
+        var length = 0
+        for i in range(offset, offset + 15) {
+          length = length * 2 + bits[i]
+        }
+        offset = offset + 15
+
+        var end_offset = offset + length
+        var sub_packets = []
+        for {
+          var sub_packet = read_packet(bits, offset)
+          sub_packets = push(sub_packets, sub_packet)
+          offset = sub_packet['end']
+          if sub_packet['end'] >= end_offset {
+            break
+          }
+        }
+        return { version, type, sub_packets, end: offset }
+      }
+
+      if length_type_id == 1 {
+        var sub_packet_count = 0
+        for i in range(offset, offset + 11) {
+          sub_packet_count = sub_packet_count * 2 + bits[i]
+        }
+        offset = offset + 11
+
+        var sub_packets = []
+        for c in range(0, sub_packet_count) {
+          var sub_packet = read_packet(bits, offset)
+          sub_packets = push(sub_packets, sub_packet)
+          offset = sub_packet['end']
+        }
+        return { version, type, sub_packets, op, end: offset }
+      }
+    }
+  }
+
+  return nil
+}
+
+part1: {
+  var bits = parse_input(input)
+  var packet = read_packet(bits, 0)
+
+  fn count_versions(packet) {
+    if packet['sub_packets'] == nil {
+      return packet['version']
+    }
+
+    var count = 0
+    for sub_packet in packet['sub_packets'] {
+      count = count + count_versions(sub_packet)
+    }
+    return count + packet['version']
+  }
+
+  return count_versions(packet)
+}
+
+part2: {
+  var bits = parse_input(input)
+  var packet = read_packet(bits, 0)
+
+  fn eval(packet) {
+    match packet['type'] {
+      0: { # sum
+        var sum = 0
+        for sub_packet in packet['sub_packets'] {
+          sum = sum + eval(sub_packet)
+        }
+        return sum
+      }
+      1: { # product
+        var product = 1
+        for sub_packet in packet['sub_packets'] {
+          product = product * eval(sub_packet)
+        }
+        return product
+      }
+      2: { # minimum
+        var min = nil
+        for sub_packet in packet['sub_packets'] {
+          var val = eval(sub_packet)
+          if min == nil || val < min {
+            min = val
+          }
+        }
+        return min
+      }
+      3: { # maximum
+        var max = 0
+        for sub_packet in packet['sub_packets'] {
+          var val = eval(sub_packet)
+          if max == nil || val > max {
+            max = val
+          }
+        }
+        return max
+      }
+      4: {
+        return packet['value']
+      }
+      5: { # greater
+        var lhs = eval(packet['sub_packets'][0])
+        var rhs = eval(packet['sub_packets'][1])
+        return lhs > rhs
+      }
+      6: { # less
+        var lhs = eval(packet['sub_packets'][0])
+        var rhs = eval(packet['sub_packets'][1])
+        return lhs < rhs
+      }
+      7: { # equal
+        var lhs = eval(packet['sub_packets'][0])
+        var rhs = eval(packet['sub_packets'][1])
+        return lhs == rhs
+      }
+      op: {
+        println('unknown op!', op)
+        return nil
+      }
+    }
+    return nil
+  }
+
+  return eval(packet)
+}
